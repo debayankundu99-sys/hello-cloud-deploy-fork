@@ -2,15 +2,24 @@
 # This file defines the build steps: test, build, push, and deploy
 
 steps:
-  # Step 1: Run unit tests
+  # Step 1: Install dependencies
+  - name: 'node:18-alpine'
+    id: 'install-deps'
+    entrypoint: 'npm'
+    args: ['ci']
+    env:
+      - 'CI=true'
+
+  # Step 2: Run unit tests
   - name: 'node:18-alpine'
     id: 'run-tests'
     entrypoint: 'npm'
     args: ['test']
     env:
       - 'NODE_ENV=test'
+    waitFor: ['install-deps']
 
-  # Step 2: Build Docker image
+  # Step 3: Build Docker image
   - name: 'gcr.io/cloud-builders/docker'
     id: 'build-image'
     args:
@@ -22,7 +31,7 @@ steps:
       - '.'
     waitFor: ['run-tests']
 
-  # Step 3: Push image to Artifact Registry
+  # Step 4: Push image to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
     id: 'push-image'
     args:
@@ -31,7 +40,7 @@ steps:
       - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/${_SERVICE_NAME}'
     waitFor: ['build-image']
 
-  # Step 4: Create Cloud Deploy release
+  # Step 5: Create Cloud Deploy release
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     id: 'create-release'
     entrypoint: 'gcloud'
