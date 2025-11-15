@@ -257,19 +257,21 @@ create_cloud_build_trigger() {
     BRANCH_NAME=${BRANCH_NAME:-main}
     
     # Extract repo name and owner from URL
-    if [[ $REPO_URL =~ github\.com[:/]([^/]+)/([^/]+)\.git ]]; then
+    if [[ $REPO_URL =~ github\.com[:/]([^/]+)/([^/]+)\.git ]] || [[ $REPO_URL =~ github\.com[:/]([^/]+)/([^/]+)$ ]]; then
         REPO_OWNER="${BASH_REMATCH[1]}"
-        REPO_NAME="${BASH_REMATCH[2]}"
+        GIT_REPO_NAME="${BASH_REMATCH[2]}"
         
-        print_info "Creating Cloud Build trigger for $REPO_OWNER/$REPO_NAME on branch $BRANCH_NAME..."
+        print_info "Creating Cloud Build trigger for $REPO_OWNER/$GIT_REPO_NAME on branch $BRANCH_NAME..."
         
         # Check if trigger already exists
-        if gcloud builds triggers list --filter="name:order-api-trigger" --format="value(name)" | grep -q "order-api-trigger"; then
+        TRIGGER_EXISTS=$(gcloud builds triggers list --project="$PROJECT_ID" --format="value(name)" 2>/dev/null | grep -x "order-api-trigger" || true)
+        
+        if [ -n "$TRIGGER_EXISTS" ]; then
             print_warning "Trigger 'order-api-trigger' already exists, skipping..."
         else
             gcloud builds triggers create github \
                 --name="order-api-trigger" \
-                --repo-name="$REPO_NAME" \
+                --repo-name="$GIT_REPO_NAME" \
                 --repo-owner="$REPO_OWNER" \
                 --branch-pattern="^${BRANCH_NAME}$" \
                 --build-config="cloudbuild.yaml" \

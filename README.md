@@ -55,6 +55,27 @@ The setup scripts will:
 - Set `PROJECT_ID` environment variable to override: `export PROJECT_ID=your-project-id`
 - Or manually set it: `gcloud config set project your-project-id`
 
+## Cleanup
+
+To remove all resources created by the setup script, use the cleanup script:
+
+### Linux/macOS (Bash)
+
+```bash
+./cleanup.sh
+```
+
+The cleanup script will:
+
+- Delete Cloud Deploy pipeline and all targets
+- Delete Cloud Run services (dev, staging, prod)
+- Delete Artifact Registry repository
+- Delete service account
+- Delete Cloud Build trigger (if exists)
+- Remove IAM policy bindings
+
+**Warning:** This will permanently delete all resources. The script will ask for confirmation before proceeding.
+
 ## Manual Setup
 
 If you prefer to set up manually or need to customize the configuration, follow the steps below:

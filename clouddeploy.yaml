@@ -5,31 +5,18 @@ apiVersion: deploy.cloud.google.com/v1
 kind: DeliveryPipeline
 metadata:
   name: order-api-pipeline
-spec:
-  description: "Order API delivery pipeline for dev, staging, and production"
-  serialPipeline:
-    stages:
-      # Stage 1: Development environment
-      - targetId: order-api-dev
-        profiles: ['dev']
-        strategy:
-          standard:
-            verify: true
-
-      # Stage 2: Staging environment
-      - targetId: order-api-staging
-        profiles: ['staging']
-        strategy:
-          standard:
-            verify: true
-
-      # Stage 3: Production environment (requires approval)
-      - targetId: order-api-prod
-        profiles: ['prod']
-        strategy:
-          standard:
-            verify: true
-            requireApproval: true
+description: Order API delivery pipeline for dev, staging, and production
+serialPipeline:
+  stages:
+    - targetId: order-api-dev
+      profiles:
+        - dev
+    - targetId: order-api-staging
+      profiles:
+        - staging
+    - targetId: order-api-prod
+      profiles:
+        - prod
 
 ---
 # Cloud Run target for Development environment
@@ -37,10 +24,9 @@ apiVersion: deploy.cloud.google.com/v1
 kind: Target
 metadata:
   name: order-api-dev
-spec:
-  description: "Development environment for Order API"
-  run:
-    location: projects/${PROJECT_ID}/locations/asia-south1
+description: Development environment for Order API
+run:
+  location: projects/_/locations/asia-south1
 
 ---
 # Cloud Run target for Staging environment
@@ -48,10 +34,9 @@ apiVersion: deploy.cloud.google.com/v1
 kind: Target
 metadata:
   name: order-api-staging
-spec:
-  description: "Staging environment for Order API"
-  run:
-    location: projects/${PROJECT_ID}/locations/asia-south1
+description: Staging environment for Order API
+run:
+  location: projects/_/locations/asia-south1
 
 ---
 # Cloud Run target for Production environment
@@ -59,8 +44,8 @@ apiVersion: deploy.cloud.google.com/v1
 kind: Target
 metadata:
   name: order-api-prod
-spec:
-  description: "Production environment for Order API"
-  run:
-    location: projects/${PROJECT_ID}/locations/asia-south1
+description: Production environment for Order API
+requireApproval: true
+run:
+  location: projects/_/locations/asia-south1
 
