@@ -25,7 +25,7 @@ steps:
     args:
       - 'build'
       - '-t'
-      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/${_SERVICE_NAME}:${_IMAGE_TAG}'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/${_SERVICE_NAME}:${BUILD_ID}'
       - '-t'
       - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/${_SERVICE_NAME}:latest'
       - '.'
@@ -43,27 +43,25 @@ steps:
   # Step 5: Create Cloud Deploy release
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     id: 'create-release'
-    entrypoint: 'gcloud'
+    entrypoint: 'bash'
     args:
-      - 'deploy'
-      - 'releases'
-      - 'create'
-      - '${_SERVICE_NAME}-rel-${_RELEASE_ID}'
-      - '--delivery-pipeline=${_SERVICE_NAME}-pipeline'
-      - '--region=${_REGION}'
-      - '--images=${_SERVICE_NAME}=${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/${_SERVICE_NAME}:${_IMAGE_TAG}'
-      - '--skaffold-file=skaffold.yaml'
+      - '-c'
+      - |
+        # Use BUILD_ID as the release identifier
+        RELEASE_NAME="${_SERVICE_NAME}-rel-$${BUILD_ID}"
+        echo "Creating Cloud Deploy release: $$RELEASE_NAME"
+        gcloud deploy releases create "$$RELEASE_NAME" \
+          --delivery-pipeline=${_SERVICE_NAME}-pipeline \
+          --region=${_REGION} \
+          --images=${_SERVICE_NAME}=${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/${_SERVICE_NAME}:$${BUILD_ID} \
+          --skaffold-file=skaffold.yaml
     waitFor: ['push-image']
 
 # Substitutions (default values, can be overridden)
-# Note: SHORT_SHA is only available when triggered from git repository
-# For git triggers, override _RELEASE_ID with SHORT_SHA
 substitutions:
   _SERVICE_NAME: 'order-api'
   _REGION: 'asia-south1'
   _REPO_NAME: 'order-api-repo'
-  _IMAGE_TAG: '${BUILD_ID}'
-  _RELEASE_ID: '${BUILD_ID}'
 
 # Build options
 options:
@@ -75,6 +73,6 @@ timeout: '1200s'
 
 # Images to be pushed to Artifact Registry
 images:
-  - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/${_SERVICE_NAME}:${_IMAGE_TAG}'
+  - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/${_SERVICE_NAME}:${BUILD_ID}'
   - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/${_SERVICE_NAME}:latest'
 
