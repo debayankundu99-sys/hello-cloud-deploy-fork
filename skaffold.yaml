@@ -12,7 +12,7 @@ build:
 manifests:
   # Cloud Run service manifests
   rawYaml:
-    - k8s/cloudrun-service.yaml
+    - k8s/cloudrun-service-dev.yaml
 deploy:
   cloudrun: {}
 profiles:
@@ -20,47 +20,17 @@ profiles:
   - name: dev
     manifests:
       rawYaml:
-        - k8s/cloudrun-service.yaml
-    patches:
-      - op: replace
-        path: /metadata/name
-        value: order-api-dev
-      - op: replace
-        path: /spec/template/spec/containers/0/env/1/value
-        value: dev
-      - op: replace
-        path: /metadata/annotations/run.googleapis.com/ingress
-        value: all
+        - k8s/cloudrun-service-dev.yaml
 
   # Staging environment profile
   - name: staging
     manifests:
       rawYaml:
-        - k8s/cloudrun-service.yaml
-    patches:
-      - op: replace
-        path: /metadata/name
-        value: order-api-stg
-      - op: replace
-        path: /spec/template/spec/containers/0/env/1/value
-        value: staging
-      - op: replace
-        path: /metadata/annotations/run.googleapis.com/ingress
-        value: all
+        - k8s/cloudrun-service-staging.yaml
 
   # Production environment profile
   - name: prod
     manifests:
       rawYaml:
-        - k8s/cloudrun-service.yaml
-    patches:
-      - op: replace
-        path: /metadata/name
-        value: order-api-prod
-      - op: replace
-        path: /spec/template/spec/containers/0/env/1/value
-        value: prod
-      - op: replace
-        path: /metadata/annotations/run.googleapis.com/ingress
-        value: all
+        - k8s/cloudrun-service-prod.yaml
 

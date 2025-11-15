@@ -1,0 +1,64 @@
+# Cloud Run service manifest
+# This is the base template that will be patched per environment
+
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: order-api-prod
+  annotations:
+    # Allow all ingress (public access)
+    # Can be changed to 'internal' or 'internal-and-cloud-load-balancing' for private access
+    run.googleapis.com/ingress: all
+    # Managed rollout strategy
+    run.googleapis.com/execution-environment: gen2
+spec:
+  template:
+    metadata:
+      annotations:
+        # Autoscaling configuration
+        autoscaling.knative.dev/minScale: '1'
+        autoscaling.knative.dev/maxScale: '10'
+        # CPU allocation
+        run.googleapis.com/cpu-throttling: 'true'
+    spec:
+      containerConcurrency: 80
+      timeoutSeconds: 300
+      serviceAccountName: order-api-sa@${PROJECT_ID}.iam.gserviceaccount.com
+      containers:
+        - image: asia-south1-docker.pkg.dev/${PROJECT_ID}/order-api-repo/order-api:${IMAGE_TAG}
+          ports:
+            - name: http1
+              containerPort: 8080
+          env:
+            - name: PORT
+              value: '8080'
+            - name: SERVICE_ENV
+              value: 'prod'
+          resources:
+            limits:
+              cpu: '2'
+              memory: 2Gi
+            requests:
+              cpu: '1'
+              memory: 1Gi
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 0
+            timeoutSeconds: 1
+            periodSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            timeoutSeconds: 1
+            periodSeconds: 10
+            failureThreshold: 3
+  # Traffic allocation (100% to latest revision)
+  traffic:
+    - percent: 100
+      latestRevision: true
+
