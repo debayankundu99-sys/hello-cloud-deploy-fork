@@ -47,13 +47,15 @@ steps:
     args:
       - '-c'
       - |
-        # Use BUILD_ID as the release identifier
-        RELEASE_NAME="${_SERVICE_NAME}-rel-$${BUILD_ID}"
+        # Generate a unique release ID using timestamp
+        RELEASE_ID=$(date +%Y%m%d-%H%M%S)
+        RELEASE_NAME="${_SERVICE_NAME}-rel-$$RELEASE_ID"
         echo "Creating Cloud Deploy release: $$RELEASE_NAME"
+        echo "Using image: ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/${_SERVICE_NAME}:${BUILD_ID}"
         gcloud deploy releases create "$$RELEASE_NAME" \
           --delivery-pipeline=${_SERVICE_NAME}-pipeline \
           --region=${_REGION} \
-          --images=${_SERVICE_NAME}=${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/${_SERVICE_NAME}:$${BUILD_ID} \
+          --images=${_SERVICE_NAME}=${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/${_SERVICE_NAME}:${BUILD_ID} \
           --skaffold-file=skaffold.yaml
     waitFor: ['push-image']
 
