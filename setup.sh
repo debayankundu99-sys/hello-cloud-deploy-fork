@@ -247,44 +247,73 @@ create_cloud_build_trigger() {
         return
     fi
     
-    read -p "Enter your Git repository URL (e.g., https://github.com/user/repo.git): " REPO_URL
-    if [ -z "$REPO_URL" ]; then
-        print_warning "No repository URL provided, skipping trigger creation"
+    echo
+    print_warning "========================================="
+    print_warning "IMPORTANT: GitHub Repository Connection"
+    print_warning "========================================="
+    print_info "Before creating a trigger, you must connect your GitHub repository to Cloud Build."
+    print_info "This is a one-time setup that requires browser authentication."
+    echo
+    print_info "Steps to connect your repository:"
+    print_info "1. Go to: https://console.cloud.google.com/cloud-build/triggers/connect?project=$PROJECT_ID"
+    print_info "2. Select 'GitHub' as the source"
+    print_info "3. Authenticate with GitHub and select your repository"
+    print_info "4. Complete the connection process"
+    echo
+    read -p "Have you already connected your GitHub repository? (y/n): " -n 1 -r
+    echo
+    
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        print_info "Please connect your repository first, then run this script again or create the trigger manually"
+        print_info "Manual trigger creation:"
+        print_info "  gcloud builds triggers create github \\"
+        print_info "    --name=order-api-trigger \\"
+        print_info "    --repo-name=YOUR_REPO \\"
+        print_info "    --repo-owner=YOUR_GITHUB_USERNAME \\"
+        print_info "    --branch-pattern='^main\$' \\"
+        print_info "    --build-config=cloudbuild.yaml \\"
+        print_info "    --substitutions=_SERVICE_NAME=$SERVICE_NAME,_REGION=$REGION,_REPO_NAME=$REPO_NAME"
+        return
+    fi
+    
+    read -p "Enter your GitHub username/organization: " REPO_OWNER
+    if [ -z "$REPO_OWNER" ]; then
+        print_warning "No repository owner provided, skipping trigger creation"
+        return
+    fi
+    
+    read -p "Enter your repository name: " GIT_REPO_NAME
+    if [ -z "$GIT_REPO_NAME" ]; then
+        print_warning "No repository name provided, skipping trigger creation"
         return
     fi
     
     read -p "Enter branch name to trigger on (default: main): " BRANCH_NAME
     BRANCH_NAME=${BRANCH_NAME:-main}
     
-    # Extract repo name and owner from URL
-    if [[ $REPO_URL =~ github\.com[:/]([^/]+)/([^/]+)\.git ]] || [[ $REPO_URL =~ github\.com[:/]([^/]+)/([^/]+)$ ]]; then
-        REPO_OWNER="${BASH_REMATCH[1]}"
-        GIT_REPO_NAME="${BASH_REMATCH[2]}"
-        
-        print_info "Creating Cloud Build trigger for $REPO_OWNER/$GIT_REPO_NAME on branch $BRANCH_NAME..."
-        
-        # Check if trigger already exists
-        TRIGGER_EXISTS=$(gcloud builds triggers list --project="$PROJECT_ID" --format="value(name)" 2>/dev/null | grep -x "order-api-trigger" || true)
-        
-        if [ -n "$TRIGGER_EXISTS" ]; then
-            print_warning "Trigger 'order-api-trigger' already exists, skipping..."
-        else
-            gcloud builds triggers create github \
-                --name="order-api-trigger" \
-                --repo-name="$GIT_REPO_NAME" \
-                --repo-owner="$REPO_OWNER" \
-                --branch-pattern="^${BRANCH_NAME}$" \
-                --build-config="cloudbuild.yaml" \
-                --substitutions="_SERVICE_NAME=$SERVICE_NAME,_REGION=$REGION,_REPO_NAME=$REPO_NAME" \
-                --project="$PROJECT_ID" \
-                --quiet
-            
-            print_success "Cloud Build trigger created"
-        fi
+    print_info "Creating Cloud Build trigger for $REPO_OWNER/$GIT_REPO_NAME on branch $BRANCH_NAME..."
+    
+    # Check if trigger already exists
+    TRIGGER_EXISTS=$(gcloud builds triggers list --project="$PROJECT_ID" --format="value(name)" 2>/dev/null | grep -x "order-api-trigger" || true)
+    
+    if [ -n "$TRIGGER_EXISTS" ]; then
+        print_warning "Trigger 'order-api-trigger' already exists, skipping..."
     else
-        print_warning "Could not parse repository URL, skipping trigger creation"
-        print_info "You can create the trigger manually using:"
-        print_info "gcloud builds triggers create github --name=order-api-trigger --repo-name=REPO --repo-owner=OWNER --branch-pattern=^main$ --build-config=cloudbuild.yaml"
+        if gcloud builds triggers create github \
+            --name="order-api-trigger" \
+            --repo-name="$GIT_REPO_NAME" \
+            --repo-owner="$REPO_OWNER" \
+            --branch-pattern="^${BRANCH_NAME}$" \
+            --build-config="cloudbuild.yaml" \
+            --substitutions="_SERVICE_NAME=$SERVICE_NAME,_REGION=$REGION,_REPO_NAME=$REPO_NAME" \
+            --project="$PROJECT_ID" \
+            --quiet 2>&1; then
+            print_success "Cloud Build trigger created"
+        else
+            print_error "Failed to create trigger. Make sure your repository is connected."
+            print_info "Connect your repository at: https://console.cloud.google.com/cloud-build/triggers/connect?project=$PROJECT_ID"
+            print_info "Then create the trigger manually or run this script again."
+        fi
     fi
 }
 
