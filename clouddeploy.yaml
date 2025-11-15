@@ -26,7 +26,7 @@ metadata:
   name: order-api-dev
 description: Development environment for Order API
 run:
-  location: projects/_/locations/asia-south1
+  location: projects/true-gradient-458616-m2/locations/asia-south1
 
 ---
 # Cloud Run target for Staging environment
@@ -36,7 +36,7 @@ metadata:
   name: order-api-staging
 description: Staging environment for Order API
 run:
-  location: projects/_/locations/asia-south1
+  location: projects/true-gradient-458616-m2/locations/asia-south1
 
 ---
 # Cloud Run target for Production environment
@@ -47,5 +47,5 @@ metadata:
 description: Production environment for Order API
 requireApproval: true
 run:
-  location: projects/_/locations/asia-south1
+  location: projects/true-gradient-458616-m2/locations/asia-south1
 
