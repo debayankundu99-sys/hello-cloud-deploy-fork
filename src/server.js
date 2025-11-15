@@ -52,10 +52,12 @@ app.use((req, res) => {
   });
 });
 
-// Start server
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Order API server running on port ${PORT} in ${SERVICE_ENV} environment`);
-});
+// Start server only if this file is run directly (not imported by tests)
+if (require.main === module) {
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Order API server running on port ${PORT} in ${SERVICE_ENV} environment`);
+  });
+}
 
 module.exports = app;
 
