@@ -23,7 +23,41 @@ Code Push → Cloud Build → Artifact Registry → Cloud Deploy → Cloud Run
 - Project ID set in GCP
 - Appropriate IAM permissions (Cloud Build Admin, Cloud Deploy Admin, Cloud Run Admin, Artifact Registry Admin)
 
-## Initial Setup
+## Quick Setup (Automated)
+
+For automated setup, use the provided setup scripts:
+
+### Linux/macOS (Bash)
+
+```bash
+./setup.sh
+```
+
+### Windows (Batch)
+
+```cmd
+setup.bat
+```
+
+The setup scripts will:
+
+- Check prerequisites (gcloud CLI, authentication)
+- **Automatically use default PROJECT_ID from gcloud config** (or prompt if not set)
+- Enable all required APIs
+- Create Artifact Registry repository
+- Create and configure service accounts
+- Grant necessary IAM permissions
+- Initialize Cloud Deploy pipeline
+- Optionally create Cloud Build trigger
+
+**Note:** The scripts automatically detect and use your default GCP project from `gcloud config`. You can also:
+
+- Set `PROJECT_ID` environment variable to override: `export PROJECT_ID=your-project-id`
+- Or manually set it: `gcloud config set project your-project-id`
+
+## Manual Setup
+
+If you prefer to set up manually or need to customize the configuration, follow the steps below:
 
 ### 1. Enable Required APIs
 
