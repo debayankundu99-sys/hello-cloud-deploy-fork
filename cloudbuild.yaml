@@ -43,33 +43,27 @@ steps:
   # Step 5: Create Cloud Deploy release
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     id: 'create-release'
-    entrypoint: 'bash'
+    entrypoint: 'gcloud'
     args:
-      - '-c'
-      - |
-        # Use SHORT_SHA if available (git trigger), otherwise use first 7 chars of BUILD_ID
-        if [ -n "$SHORT_SHA" ]; then
-          RELEASE_ID="$SHORT_SHA"
-        else
-          RELEASE_ID="${BUILD_ID:0:7}"
-        fi
-        RELEASE_NAME="${_SERVICE_NAME}-rel-$$RELEASE_ID"
-        echo "Creating release: $$RELEASE_NAME with image tag: ${_IMAGE_TAG}"
-        gcloud deploy releases create $$RELEASE_NAME \
-          --delivery-pipeline=${_SERVICE_NAME}-pipeline \
-          --region=${_REGION} \
-          --images=${_SERVICE_NAME}=${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/${_SERVICE_NAME}:${_IMAGE_TAG} \
-          --skaffold-file=skaffold.yaml
+      - 'deploy'
+      - 'releases'
+      - 'create'
+      - '${_SERVICE_NAME}-rel-${_RELEASE_ID}'
+      - '--delivery-pipeline=${_SERVICE_NAME}-pipeline'
+      - '--region=${_REGION}'
+      - '--images=${_SERVICE_NAME}=${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/${_SERVICE_NAME}:${_IMAGE_TAG}'
+      - '--skaffold-file=skaffold.yaml'
     waitFor: ['push-image']
 
 # Substitutions (default values, can be overridden)
 # Note: SHORT_SHA is only available when triggered from git repository
-# When submitting manually, BUILD_ID is used instead
+# For git triggers, override _RELEASE_ID with SHORT_SHA
 substitutions:
   _SERVICE_NAME: 'order-api'
   _REGION: 'asia-south1'
   _REPO_NAME: 'order-api-repo'
   _IMAGE_TAG: '${BUILD_ID}'
+  _RELEASE_ID: '${BUILD_ID}'
 
 # Build options
 options:

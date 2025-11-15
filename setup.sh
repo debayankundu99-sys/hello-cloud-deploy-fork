@@ -272,7 +272,7 @@ create_cloud_build_trigger() {
         print_info "    --repo-owner=YOUR_GITHUB_USERNAME \\"
         print_info "    --branch-pattern='^main\$' \\"
         print_info "    --build-config=cloudbuild.yaml \\"
-        print_info "    --substitutions=_SERVICE_NAME=$SERVICE_NAME,_REGION=$REGION,_REPO_NAME=$REPO_NAME,_IMAGE_TAG='\$SHORT_SHA'"
+        print_info "    --substitutions=_SERVICE_NAME=$SERVICE_NAME,_REGION=$REGION,_REPO_NAME=$REPO_NAME,_IMAGE_TAG='\$SHORT_SHA',_RELEASE_ID='\$SHORT_SHA'"
         return
     fi
     
@@ -305,7 +305,7 @@ create_cloud_build_trigger() {
             --repo-owner="$REPO_OWNER" \
             --branch-pattern="^${BRANCH_NAME}$" \
             --build-config="cloudbuild.yaml" \
-            --substitutions="_SERVICE_NAME=$SERVICE_NAME,_REGION=$REGION,_REPO_NAME=$REPO_NAME,_IMAGE_TAG=\$SHORT_SHA" \
+            --substitutions="_SERVICE_NAME=$SERVICE_NAME,_REGION=$REGION,_REPO_NAME=$REPO_NAME,_IMAGE_TAG=\$SHORT_SHA,_RELEASE_ID=\$SHORT_SHA" \
             --project="$PROJECT_ID" \
             --quiet 2>&1; then
             print_success "Cloud Build trigger created"
