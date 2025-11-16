@@ -23,9 +23,9 @@ spec:
     spec:
       containerConcurrency: 80
       timeoutSeconds: 300
-      serviceAccountName: order-api-sa@${PROJECT_ID}.iam.gserviceaccount.com
+      serviceAccountName: order-api-sa@true-gradient-458616-m2.iam.gserviceaccount.com
       containers:
-        - image: asia-south1-docker.pkg.dev/${PROJECT_ID}/order-api-repo/order-api:${IMAGE_TAG}
+        - image: asia-south1-docker.pkg.dev/true-gradient-458616-m2/order-api-repo/order-api
           ports:
             - name: http1
               containerPort: 8080
