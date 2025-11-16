@@ -23,7 +23,8 @@ spec:
     spec:
       containerConcurrency: 80
       timeoutSeconds: 300
-      serviceAccountName: order-api-sa@${PROJECT_ID}.iam.gserviceaccount.com
+      # serviceAccountName: order-api-sa@PROJECT_ID.iam.gserviceaccount.com
+      # Service account is optional - Cloud Run will use default compute service account if not specified
       containers:
         - image: asia-south1-docker.pkg.dev/${PROJECT_ID}/order-api-repo/order-api:${IMAGE_TAG}
           ports:

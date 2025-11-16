@@ -118,8 +118,8 @@ gcloud projects add-iam-policy-binding %PROJECT_ID% --member="serviceAccount:%SE
 echo [SUCCESS] Service account permissions configured
 echo.
 
-REM Grant Cloud Build permissions
-echo [INFO] Granting permissions to Cloud Build service account...
+REM Grant Cloud Build and Cloud Deploy permissions
+echo [INFO] Granting permissions to Cloud Build and Cloud Deploy service accounts...
 set CLOUD_BUILD_SA=%PROJECT_ID%@cloudbuild.gserviceaccount.com
 
 REM Grant Artifact Registry writer
@@ -134,10 +134,21 @@ gcloud projects add-iam-policy-binding %PROJECT_ID% --member="serviceAccount:%CL
 REM Grant Cloud Deploy job runner
 gcloud projects add-iam-policy-binding %PROJECT_ID% --member="serviceAccount:%CLOUD_BUILD_SA%" --role="roles/clouddeploy.jobRunner" --condition=None --quiet >nul 2>&1
 
-REM Grant service account user role
+REM Grant service account user role to Cloud Build
 gcloud iam service-accounts add-iam-policy-binding %SERVICE_ACCOUNT_NAME%@%PROJECT_ID%.iam.gserviceaccount.com --member="serviceAccount:%CLOUD_BUILD_SA%" --role="roles/iam.serviceAccountUser" --project=%PROJECT_ID% --quiet >nul 2>&1
 
-echo [SUCCESS] Cloud Build permissions granted
+REM Get Cloud Deploy service agent
+for /f "delims=" %%i in ('gcloud projects describe %PROJECT_ID% --format="value(projectNumber)"') do set PROJECT_NUMBER=%%i
+set CLOUD_DEPLOY_SA=service-%PROJECT_NUMBER%@gcp-sa-clouddeploy.iam.gserviceaccount.com
+
+REM Grant Cloud Deploy service agent permission to act as the service account
+echo [INFO] Granting Cloud Deploy service agent permission to deploy Cloud Run services...
+gcloud iam service-accounts add-iam-policy-binding %SERVICE_ACCOUNT_NAME%@%PROJECT_ID%.iam.gserviceaccount.com --member="serviceAccount:%CLOUD_DEPLOY_SA%" --role="roles/iam.serviceAccountUser" --project=%PROJECT_ID% --quiet >nul 2>&1
+
+REM Grant Cloud Deploy service agent Cloud Run admin
+gcloud projects add-iam-policy-binding %PROJECT_ID% --member="serviceAccount:%CLOUD_DEPLOY_SA%" --role="roles/run.developer" --condition=None --quiet >nul 2>&1
+
+echo [SUCCESS] Cloud Build and Cloud Deploy permissions granted
 echo.
 
 REM Initialize Cloud Deploy

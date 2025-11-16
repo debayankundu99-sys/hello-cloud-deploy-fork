@@ -161,9 +161,9 @@ create_service_account() {
     print_success "Service account permissions configured"
 }
 
-# Grant Cloud Build permissions
+# Grant Cloud Build and Cloud Deploy permissions
 grant_cloud_build_permissions() {
-    print_info "Granting permissions to Cloud Build service account..."
+    print_info "Granting permissions to Cloud Build and Cloud Deploy service accounts..."
     
     CLOUD_BUILD_SA="${PROJECT_ID}@cloudbuild.gserviceaccount.com"
     
@@ -195,7 +195,7 @@ grant_cloud_build_permissions() {
         --condition=None \
         --quiet >/dev/null 2>&1 || true
     
-    # Grant service account user role
+    # Grant service account user role to Cloud Build
     gcloud iam service-accounts add-iam-policy-binding \
         "${SERVICE_ACCOUNT_NAME}@${PROJECT_ID}.iam.gserviceaccount.com" \
         --member="serviceAccount:${CLOUD_BUILD_SA}" \
@@ -203,7 +203,27 @@ grant_cloud_build_permissions() {
         --project="$PROJECT_ID" \
         --quiet >/dev/null 2>&1 || true
     
-    print_success "Cloud Build permissions granted"
+    # Get Cloud Deploy service agent (created when Cloud Deploy API is enabled)
+    PROJECT_NUMBER=$(gcloud projects describe "$PROJECT_ID" --format="value(projectNumber)")
+    CLOUD_DEPLOY_SA="service-${PROJECT_NUMBER}@gcp-sa-clouddeploy.iam.gserviceaccount.com"
+    
+    # Grant Cloud Deploy service agent permission to act as the service account
+    print_info "Granting Cloud Deploy service agent permission to deploy Cloud Run services..."
+    gcloud iam service-accounts add-iam-policy-binding \
+        "${SERVICE_ACCOUNT_NAME}@${PROJECT_ID}.iam.gserviceaccount.com" \
+        --member="serviceAccount:${CLOUD_DEPLOY_SA}" \
+        --role="roles/iam.serviceAccountUser" \
+        --project="$PROJECT_ID" \
+        --quiet >/dev/null 2>&1 || true
+    
+    # Grant Cloud Deploy service agent Cloud Run admin
+    gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+        --member="serviceAccount:${CLOUD_DEPLOY_SA}" \
+        --role="roles/run.developer" \
+        --condition=None \
+        --quiet >/dev/null 2>&1 || true
+    
+    print_success "Cloud Build and Cloud Deploy permissions granted"
 }
 
 # Initialize Cloud Deploy
