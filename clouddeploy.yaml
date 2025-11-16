@@ -48,4 +48,3 @@ description: Production environment for Order API
 requireApproval: true
 run:
   location: projects/true-gradient-458616-m2/locations/asia-south1
-
