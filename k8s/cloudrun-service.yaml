@@ -9,12 +9,12 @@ metadata:
     # Allow all ingress (public access)
     # Can be changed to 'internal' or 'internal-and-cloud-load-balancing' for private access
     run.googleapis.com/ingress: all
-    # Managed rollout strategy
-    run.googleapis.com/execution-environment: gen2
 spec:
   template:
     metadata:
       annotations:
+        # Execution environment
+        run.googleapis.com/execution-environment: gen2
         # Autoscaling configuration
         autoscaling.knative.dev/minScale: '1'
         autoscaling.knative.dev/maxScale: '10'
