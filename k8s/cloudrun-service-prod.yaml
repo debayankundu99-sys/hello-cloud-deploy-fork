@@ -31,8 +31,6 @@ spec:
             - name: http1
               containerPort: 8080
           env:
-            - name: PORT
-              value: '8080'
             - name: SERVICE_ENV
               value: 'prod'
           resources:
