@@ -246,7 +246,7 @@ gcloud alpha builds connections list --region=$REGION
 
 ```bash
 # Set GitHub repository details
-export GIT_REPO_OWNER="YOUR-USERNAME"  # Replace with your GitHub username
+export GIT_REPO_OWNER="debayankundu99-sys"  # Replace with your GitHub username
 export GIT_REPO_NAME="hello-cloud-deploy"
 export BRANCH_NAME="main"
 
