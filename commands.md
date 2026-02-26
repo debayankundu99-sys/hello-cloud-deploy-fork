@@ -24,7 +24,7 @@ Before starting, ensure you have:
 
 ```bash
 # Set your project ID
-export PROJECT_ID="project-6ac7305f-865b-4b3f-946"  # Replace with your actual project ID
+export PROJECT_ID="upgradlabs-1749732688326"  # Replace with your actual project ID
 
 # Or use the current gcloud config project
 export PROJECT_ID=$(gcloud config get-value project)
