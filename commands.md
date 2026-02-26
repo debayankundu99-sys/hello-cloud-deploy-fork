@@ -24,7 +24,7 @@ Before starting, ensure you have:
 
 ```bash
 # Set your project ID
-export PROJECT_ID="your-project-id"  # Replace with your actual project ID
+export PROJECT_ID="project-6ac7305f-865b-4b3f-946"  # Replace with your actual project ID
 
 # Or use the current gcloud config project
 export PROJECT_ID=$(gcloud config get-value project)
@@ -62,7 +62,7 @@ sleep 60
 
 ```bash
 # Clone your repository
-git clone https://github.com/YOUR-USERNAME/hello-cloud-deploy.git
+git clone https://github.com/debayankundu99-sys/hello-cloud-deploy.git
 cd hello-cloud-deploy
 
 # Install Node.js dependencies locally (optional, for local testing)
